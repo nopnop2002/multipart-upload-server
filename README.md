@@ -1,8 +1,6 @@
 # multipart-upload-server
 multipart-upload-server for Flask &amp; Tornado
 
-
-I tested with Tornado & Flask.   
 You can choose the one you like.   
 
 # Using Tornado
