@@ -1,5 +1,5 @@
 # multipart-upload-server
-multipart-upload-server for Flask &amp; Tornado
+multipart/form-data upload server for Flask &amp; Tornado
 
 You can choose the one you like.   
 
