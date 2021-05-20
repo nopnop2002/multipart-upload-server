@@ -6,60 +6,73 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.options
 import tornado.web
+import logging
+import json
 
 from tornado.options import define, options
 define("port", default=8080, help="run on the given port", type=int)
 
 # ex) set UPLOAD_DIR_PATH=C:/tmp/flaskUploadDir
 UPLOAD_DIR = os.getenv("UPLOAD_DIR_PATH")
-print("UPLOAD_DIR={}".format(UPLOAD_DIR))
+logging.info("UPLOAD_DIR={}".format(UPLOAD_DIR))
 if (UPLOAD_DIR == None):
-    UPLOAD_DIR = os.getcwd()
-    print("UPLOAD_DIR={}".format(UPLOAD_DIR))
+	UPLOAD_DIR = os.path.join(os.getcwd(), "UPLOADED")
+	logging.info("UPLOAD_DIR={}".format(UPLOAD_DIR))
+
+if (os.path.exists(UPLOAD_DIR) == False):
+	logging.warning("UPLOAD_DIR [{}] not found. Create this".format(UPLOAD_DIR))
+	os.mkdir(UPLOAD_DIR)
 
 class IndexHandler(tornado.web.RequestHandler):
-    def get(self):
-        print("IndexHandler:get")
-        self.write("Hello World")
+	def get(self):
+		print("IndexHandler:get")
+		self.write("Hello World")
 
 class UploadHandler(tornado.web.RequestHandler):
-    def post(self):
-        print("UploadHandler:post")
-        if 'uploadFile' not in self.request.files:
-            responce = {"result": "upload FAIL.uploadFile is not included in the request."}
-            self.write(json.dumps(responce))
-            return
+	def post(self):
+		logging.info("UploadHandler:post")
+		logging.info("self.request={}".format(self.request))
+		#print("self.request.files={}".format(self.request.files))
+		"""
+		print("UploadHandler:post self.request={}".format(self.request))
+		if 'uploadFile' not in self.request.files:
+			responce = {"result": "upload FAIL.uploadFile is not included in the request."}
+			self.write(json.dumps(responce))
+			return
+		"""
 
-        files = self.request.files['uploadFile']
-        #print("type(files)={}".format(type(files)))
-        #print("files={}".format(files))
-        file = files[0]
-        fileName = file['filename']
-        fileBody = file['body']
-        print("fileName={}".format(fileName))
+		fileinfo = self.request.files['upfile'][0]
+		#logging.info("fileinfo={}".format(fileinfo))
+		filename = fileinfo['filename'] 
+		body = fileinfo['body'] 
+		logging.info("filename={}".format(filename))
+		filepath = os.path.join(UPLOAD_DIR, werkzeug.utils.secure_filename(filename))
+		logging.info("filepath={}".format(filepath))
 
-        saveFileName = datetime.now().strftime("%Y%m%d_%H%M%S_") \
-            + werkzeug.utils.secure_filename(fileName)
-        print("saveFileName={}".format(saveFileName))
+		try:
+			f = open(filepath, "wb")
+			f.write(body)
+			f.close()
+			logging.info("{} uploaded {}, saved as {}".format(self.request.remote_ip, filename, filepath))
+			responce = {"result": "upload OK"}
+		except IOError as e:
+			logging.error("Failed to write file due to IOError %s", str(e))
+			responce = {"result": "upload FAIL"}
 
-        f = open(saveFileName, "wb")
-        f.write(fileBody)
-        f.close()
-        responce = {"result": "upload OK"}
-        self.write(responce)
+		self.write(responce)
 
 def make_app():
-    return tornado.web.Application([
-        (r"/", IndexHandler),
-        (r"/upload_multipart", UploadHandler),
-    ],debug=True)
+	return tornado.web.Application([
+		(r"/", IndexHandler),
+		(r"/upload_multipart", UploadHandler),
+	],debug=True)
 
 if __name__ == "__main__":
-    tornado.options.parse_command_line()
-    app = make_app()
-    #app = tornado.web.Application(handlers=[(r"/", IndexHandler)],debug=True)
-    http_server = tornado.httpserver.HTTPServer(app)
-    http_server.listen(options.port)
-    tornado.ioloop.IOLoop.current().start()
+	tornado.options.parse_command_line()
+	app = make_app()
+	#app = tornado.web.Application(handlers=[(r"/", IndexHandler)],debug=True)
+	http_server = tornado.httpserver.HTTPServer(app)
+	http_server.listen(options.port)
+	tornado.ioloop.IOLoop.current().start()
 
 
