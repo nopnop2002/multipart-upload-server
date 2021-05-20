@@ -20,6 +20,14 @@ cd multipart-upload-server/tornado
 python upload.py
 ```
 
+## Upload file using curl
+```
+curl -X POST -F upfile=@tornado/tornado-web-service.jpg http://localhost:8080/upload_multipart
+
+ls -l tornado/UPLOADED/
+-rw-rw-r-- 1 nop nop 13189  5月 21 08:58 tornado-web-service.jpg
+```
+
 ---
 
 # Using Flask
