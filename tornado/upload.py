@@ -33,13 +33,6 @@ class UploadHandler(tornado.web.RequestHandler):
 		logging.info("UploadHandler:post")
 		logging.info("self.request={}".format(self.request))
 		#print("self.request.files={}".format(self.request.files))
-		"""
-		print("UploadHandler:post self.request={}".format(self.request))
-		if 'uploadFile' not in self.request.files:
-			responce = {"result": "upload FAIL.uploadFile is not included in the request."}
-			self.write(json.dumps(responce))
-			return
-		"""
 
 		fileinfo = self.request.files['upfile'][0]
 		#logging.info("fileinfo={}".format(fileinfo))
