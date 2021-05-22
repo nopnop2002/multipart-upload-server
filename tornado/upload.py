@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 import werkzeug
 from datetime import datetime
 import tornado.httpserver
@@ -8,31 +9,106 @@ import tornado.options
 import tornado.web
 import logging
 import json
+import magic
+import urllib
 
 from tornado.options import define, options
 define("port", default=8080, help="run on the given port", type=int)
 
-# ex) set UPLOAD_DIR_PATH=C:/tmp/flaskUploadDir
-UPLOAD_DIR = os.getenv("UPLOAD_DIR_PATH")
+UPLOAD_DIR = os.path.join(os.getcwd(), "uploaded")
 logging.info("UPLOAD_DIR={}".format(UPLOAD_DIR))
-if (UPLOAD_DIR == None):
-	UPLOAD_DIR = os.path.join(os.getcwd(), "UPLOADED")
-	logging.info("UPLOAD_DIR={}".format(UPLOAD_DIR))
-
 if (os.path.exists(UPLOAD_DIR) == False):
 	logging.warning("UPLOAD_DIR [{}] not found. Create this".format(UPLOAD_DIR))
 	os.mkdir(UPLOAD_DIR)
 
 class IndexHandler(tornado.web.RequestHandler):
 	def get(self):
-		print("IndexHandler:get")
-		self.write("Hello World")
+		logging.info("IndexHandler:get")
+		files = []
+		dirs = []
+		meta = {
+				"current_directory": UPLOAD_DIR
+		}
+
+		for (dirpath, dirnames, filenames) in os.walk(UPLOAD_DIR):
+			logging.info("filenames={}".format(filenames))
+			for name in filenames:
+				nm = os.path.join(dirpath, name).replace(UPLOAD_DIR, "").strip("/").split("/")
+				logging.info("nm={}".format(nm))
+				# Skip if the file is in a subdirect
+				# nm=['templates', 'index.html']
+				if len(nm) != 1: continue
+
+				fullpath = os.path.join(dirpath, name)
+				logging.info("fullpath={}".format(fullpath))
+				if os.path.isfile(fullpath) == False: continue
+				size = os.stat(fullpath).st_size
+
+				mime = magic.from_file(fullpath, mime=True)
+				logging.info("mime={}".format(mime))
+				visible = "image/" in mime
+				if (visible == False):
+					visible = "text/" in mime
+				logging.info("visible={}".format(visible))
+
+				files.append({
+					"name": name,
+					"size": str(size) + " B",
+					"mime": mime,
+					"fullname": fullpath,
+					"visible": visible
+				})
+
+		self.render("index.html", files=sorted(files, key=lambda k: k["name"].lower()), folders=dirs, meta=meta)
+		#self.write("Hello World")
+
+class DownloadHandler(tornado.web.RequestHandler):
+	def get(self, filename):
+		logging.info("{}:filename={}".format(sys._getframe().f_code.co_name, filename))
+		if os.path.isfile(filename):
+			if os.path.dirname(filename) == UPLOAD_DIR.rstrip("/"):
+				self.set_header('Content-Type', 'application/octet-stream')
+				self.set_header('Content-Disposition', 'attachment; filename=' + os.path.basename(filename))
+				with open(filename, 'rb') as f:
+					while True:
+						data = f.read(4096)
+						if not data: break
+						self.write(data)
+				self.finish()
+			else:
+				return render_template("no_permission.html")
+		else:
+			return render_template("not_found.html")
+
+class ImageviewHandler(tornado.web.RequestHandler):
+	def get(self, filename):
+		logging.info("{}:filename={}".format(sys._getframe().f_code.co_name, filename))
+
+		mime = magic.from_file(filename, mime=True)
+		mime = mime.split("/")
+		logging.info("mime={}".format(mime))
+
+		if (mime[0] == "image"):
+			logging.debug("filename={}".format(filename))
+			filename = os.path.basename(filename)
+			logging.debug("filename={}".format(filename))
+			filename = os.path.join("/uploaded", filename)
+			logging.debug("filename={}".format(filename))
+			self.render("view.html", user_image = filename)
+
+		if (mime[0] == "text"):
+			contents = ""
+			f = open(filename, 'r')
+			datalist = f.readlines()
+			for data in datalist:
+				logging.debug("[{}]".format(data.rstrip()))
+				contents = contents + data.rstrip() + "<br>"
+			self.write(contents)
 
 class UploadHandler(tornado.web.RequestHandler):
 	def post(self):
 		logging.info("UploadHandler:post")
 		logging.info("self.request={}".format(self.request))
-		#print("self.request.files={}".format(self.request.files))
 
 		fileinfo = self.request.files['upfile'][0]
 		#logging.info("fileinfo={}".format(fileinfo))
@@ -55,10 +131,15 @@ class UploadHandler(tornado.web.RequestHandler):
 		self.write(responce)
 
 def make_app():
-	return tornado.web.Application([
+	return tornado.web.Application(
+		handlers=[
 		(r"/", IndexHandler),
+		(r"/download/(.*)", DownloadHandler),
+		(r"/imageview/(.*)", ImageviewHandler),
 		(r"/upload_multipart", UploadHandler),
-	],debug=True)
+		],
+		template_path=os.path.join(os.path.dirname(__file__), "templates"),
+		debug=True)
 
 if __name__ == "__main__":
 	tornado.options.parse_command_line()
