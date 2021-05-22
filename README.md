@@ -7,7 +7,7 @@ You can choose the one you like.
 
 ## Install Tornado
 ```
-sudo apt install python3-pip python3-setuptools
+sudo apt install python3-pip python3-setuptools python3-magic
 python -m pip install -U pip
 python -m pip install -U wheel
 python -m pip install tornado
@@ -37,7 +37,6 @@ ls -l tornado/UPLOADED/
 sudo apt install python3-pip python3-setuptools python3-magic
 python -m pip install -U pip
 python -m pip install -U wheel
-python -m pip install -U Werkzeug
 python -m pip install -U Werkzeug
 python -m pip install flask
 ```
