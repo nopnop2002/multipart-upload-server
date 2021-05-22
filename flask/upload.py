@@ -9,7 +9,6 @@ from werkzeug.serving import WSGIRequestHandler
 import logging
 import json
 import magic
-import urllib
 
 # flask
 app = Flask(__name__)
@@ -54,35 +53,21 @@ def hello():
 				visible = "text/" in mime
 			logging.info("visible={}".format(visible))
 
-			if sys.version_info.major == 2:
-				files.append({
-					"name": name,
-					"size": str(size) + " B",
-					"mime": mime,
-					"fullname": urllib.quote_plus(fullpath),
-					"visible": visible
-				})
-
-			if sys.version_info.major == 3:
-				files.append({
-					"name": name,
-					"size": str(size) + " B",
-					"mime": mime,
-					"fullname": urllib.parse.quote_plus(fullpath),
-					"visible": visible
-				})
-
+			files.append({
+				"name": name,
+				"size": str(size) + " B",
+				"mime": mime,
+				"fullname": fullpath,
+				"visible": visible
+			})
 
 	return render_template("index.html", files=sorted(files, key=lambda k: k["name"].lower()), folders=dirs, meta=meta)
 
 
-@app.route("/download/<filename>")
-def download(filename):
+@app.route("/download")
+def download():
+	filename = request.args.get('filename', default=None, type=str)
 	logging.info("{}:filename={}".format(sys._getframe().f_code.co_name, filename))
-	if sys.version_info.major == 2:
-		filename = urllib.unquote(filename)
-	if sys.version_info.major == 3:
-		filename = urllib.parse.unquote(filename)
 
 	if os.path.isfile(filename):
 		if os.path.dirname(filename) == UPLOAD_DIR.rstrip("/"):
@@ -93,13 +78,10 @@ def download(filename):
 		return render_template("not_found.html")
 	return None
 
-@app.route("/imageview/<filename>")
-def imageview(filename):
+@app.route("/imageview")
+def imageview():
+	filename = request.args.get('filename', default=None, type=str)
 	logging.info("{}:filename={}".format(sys._getframe().f_code.co_name, filename))
-	if sys.version_info.major == 2:
-		filename = urllib.unquote(filename)
-	if sys.version_info.major == 3:
-		filename = urllib.parse.unquote(filename)
 
 	mime = magic.from_file(filename, mime=True)
 	mime = mime.split("/")
