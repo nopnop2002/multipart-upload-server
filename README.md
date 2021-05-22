@@ -7,7 +7,7 @@ You can choose the one you like.
 
 ## Install Tornado
 ```
-sudo apt install python3-pip python3-setuptools python3-magic
+sudo apt install python-pip python-setuptools
 python -m pip install -U pip
 python -m pip install -U wheel
 python -m pip install tornado
@@ -34,10 +34,9 @@ ls -l tornado/UPLOADED/
 
 ## Install Flask
 ```
-sudo apt install python3-pip python3-setuptools python3-magic
+sudo apt install python-pip python-setuptools
 python -m pip install -U pip
 python -m pip install -U wheel
-python -m pip install -U Werkzeug
 python -m pip install flask
 ```
 
@@ -55,3 +54,13 @@ curl -X POST -F upfile=@flask/Flask_logo.png http://localhost:8080/upload_multip
 ls -l flask/UPLOADED/
 -rw-rw-r-- 1 nop nop 13189  5月 21 08:58 tornado-web-service.jpg
 ```
+
+---
+
+# View file
+![multipart-upload-server-1](https://user-images.githubusercontent.com/6020549/119225534-4af78000-bb3f-11eb-83fc-d3c93b31e4eb.jpg)
+
+![multipart-upload-server-2](https://user-images.githubusercontent.com/6020549/119225542-5054ca80-bb3f-11eb-95a3-f558e606f68c.jpg)
+
+![multipart-upload-server-3](https://user-images.githubusercontent.com/6020549/119225537-4b901680-bb3f-11eb-9f0c-e009b5f6c56d.jpg)
+
