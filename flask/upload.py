@@ -3,7 +3,8 @@ import os
 import sys
 import werkzeug
 from datetime import datetime
-from flask import Flask, request, render_template, send_file, Blueprint
+#from flask import Flask, request, render_template, send_file, Blueprint
+from flask import *
 from werkzeug.serving import WSGIRequestHandler
 import logging
 import json
@@ -25,7 +26,6 @@ if (os.path.exists(UPLOAD_DIR) == False):
 add_app = Blueprint("uploaded", __name__, static_url_path='/uploaded', static_folder='./uploaded')
 app.register_blueprint(add_app)
 
-
 @app.route("/")
 def hello():
 	files = []
@@ -33,7 +33,6 @@ def hello():
 	meta = {
 		"current_directory": UPLOAD_DIR
 	}
-
 	for (dirpath, dirnames, filenames) in os.walk(UPLOAD_DIR):
 		logging.info("filenames={}".format(filenames))
 		for name in filenames:
@@ -125,17 +124,12 @@ def imageview(filename):
 
 @app.route('/upload_multipart', methods=['POST'])
 def upload_multipart():
+	print("upload_multipart")
 	logging.info("request={}".format(request))
 	logging.info("request.files={}".format(request.files))
 	dict = request.files.to_dict(flat=False)
 	logging.info("dict={}".format(dict))
 
-	"""
-	if 'uploadFile' not in request.files:
-		return make_response(jsonify({'result':'uploadFile is required'}))
-
-	file = request.files['uploadFile']
-	"""
 
 	'''
 	file is werkzeug.datastructures.FileStorage Object.
@@ -170,5 +164,5 @@ def upload_multipart():
 # main
 if __name__ == "__main__":
 	WSGIRequestHandler.protocol_version = "HTTP/1.1"
-	#logging.info("app.url_map={}".format(app.url_map))
 	app.run(host='0.0.0.0', port=8080, debug=True)
+	#app.run(host='0.0.0.0', port=8080)
