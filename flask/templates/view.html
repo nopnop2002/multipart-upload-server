@@ -1,9 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Image</title>
+	<title>Image</title>
+    <style type="text/css">
+        .rotate90 {
+            -webkit-transform: rotate(90deg);
+            -moz-transform: rotate(90deg);
+            -o-transform: rotate(90deg);
+            -ms-transform: rotate(90deg);
+            transform: rotate(90deg);
+            position: absolute;
+            top: 0px;
+        }
+    </style>
 </head>
 <body>
-<img src="{{ user_image }}" alt="{{ user_image }}"/>
+{% if rotate == 0 %}
+	<div>
+	<img src="{{ user_image }}" alt="{{ user_image }}">
+	</div>
+{% elif rotate == 90 %}
+	<div class="rotate90">
+	<img src="{{ user_image }}" alt="{{ user_image }}">
+	</div>
+{% endif %}
 </body>
 </html>
