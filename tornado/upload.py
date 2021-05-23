@@ -10,7 +10,6 @@ import tornado.web
 import logging
 import json
 import magic
-import urllib
 
 from tornado.options import define, options
 define("port", default=8080, help="run on the given port", type=int)
@@ -27,7 +26,7 @@ class IndexHandler(tornado.web.RequestHandler):
 		files = []
 		dirs = []
 		meta = {
-				"current_directory": UPLOAD_DIR
+			"current_directory": UPLOAD_DIR
 		}
 
 		for (dirpath, dirnames, filenames) in os.walk(UPLOAD_DIR):
@@ -138,26 +137,22 @@ class UploadHandler(tornado.web.RequestHandler):
 		self.write(responce)
 
 def make_app():
-	settings = {
-	"static_path": os.path.join(os.getcwd(), "uploaded"),
-	"static_url_prefix": "/uploaded/",
-	}
 	return tornado.web.Application(
 		handlers=[
-		(r"/", IndexHandler),
-		(r"/download", DownloadHandler),
-		(r"/imageview", ImageviewHandler),
-		(r"/upload_multipart", UploadHandler),
+			(r'/uploaded/(.*)', tornado.web.StaticFileHandler, {'path': "uploaded"}),
+			(r'/static/(.*)', tornado.web.StaticFileHandler, {'path': "static"}),
+			(r"/", IndexHandler),
+			(r"/download", DownloadHandler),
+			(r"/imageview", ImageviewHandler),
+			(r"/upload_multipart", UploadHandler),
 		],
 		template_path=os.path.join(os.getcwd(), "templates"),
 		#static_path=os.path.join(os.getcwd(), "statics"),
-		**settings,
 		debug=True)
 
 if __name__ == "__main__":
 	tornado.options.parse_command_line()
 	app = make_app()
-	#app = tornado.web.Application(handlers=[(r"/", IndexHandler)],debug=True)
 	http_server = tornado.httpserver.HTTPServer(app)
 	http_server.listen(options.port)
 	tornado.ioloop.IOLoop.current().start()
