@@ -63,7 +63,8 @@ class IndexHandler(tornado.web.RequestHandler):
 		#self.write("Hello World")
 
 class DownloadHandler(tornado.web.RequestHandler):
-	def get(self, filename):
+	def get(self):
+		filename = self.get_argument('filename', default=None)
 		logging.info("{}:filename={}".format(sys._getframe().f_code.co_name, filename))
 		if os.path.isfile(filename):
 			if os.path.dirname(filename) == UPLOAD_DIR.rstrip("/"):
@@ -81,20 +82,26 @@ class DownloadHandler(tornado.web.RequestHandler):
 			return render_template("not_found.html")
 
 class ImageviewHandler(tornado.web.RequestHandler):
-	def get(self, filename):
+	def get(self):
+		filename = self.get_argument('filename', default=None)
 		logging.info("{}:filename={}".format(sys._getframe().f_code.co_name, filename))
+		rotate = self.get_argument('rotate', default=0)
+		logging.info("{}:rotate={}{}".format(sys._getframe().f_code.co_name, rotate, type(rotate)))
+		if (type(rotate) is str): 
+			rotate = int(rotate)
+			logging.info("{}:rotate={}{}".format(sys._getframe().f_code.co_name, rotate, type(rotate)))
 
 		mime = magic.from_file(filename, mime=True)
 		mime = mime.split("/")
 		logging.info("mime={}".format(mime))
 
 		if (mime[0] == "image"):
-			logging.debug("filename={}".format(filename))
+			logging.info("filename={}".format(filename))
 			filename = os.path.basename(filename)
-			logging.debug("filename={}".format(filename))
+			logging.info("filename={}".format(filename))
 			filename = os.path.join("/uploaded", filename)
-			logging.debug("filename={}".format(filename))
-			self.render("view.html", user_image = filename)
+			logging.info("filename={}".format(filename))
+			self.render("view.html", user_image = filename, rotate=rotate)
 
 		if (mime[0] == "text"):
 			contents = ""
@@ -131,14 +138,20 @@ class UploadHandler(tornado.web.RequestHandler):
 		self.write(responce)
 
 def make_app():
+	settings = {
+	"static_path": os.path.join(os.getcwd(), "uploaded"),
+	"static_url_prefix": "/uploaded/",
+	}
 	return tornado.web.Application(
 		handlers=[
 		(r"/", IndexHandler),
-		(r"/download/(.*)", DownloadHandler),
-		(r"/imageview/(.*)", ImageviewHandler),
+		(r"/download", DownloadHandler),
+		(r"/imageview", ImageviewHandler),
 		(r"/upload_multipart", UploadHandler),
 		],
-		template_path=os.path.join(os.path.dirname(__file__), "templates"),
+		template_path=os.path.join(os.getcwd(), "templates"),
+		#static_path=os.path.join(os.getcwd(), "statics"),
+		**settings,
 		debug=True)
 
 if __name__ == "__main__":

@@ -27,6 +27,9 @@
                   <th>
                     View
                   </th>
+                  <th>
+                    View(Rotate)
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -58,14 +61,21 @@
                       <span class="label label-primary">{{ file['mime'] }}</span>
                     </td>
                     <td>
-                      <a href="download/{{ file['fullname'] }}" class="label label-success"><i class="fa fa-download"></i> Download</a>
+                      <a href="download?filename={{ file['fullname'] }}" class="label label-success"><i class="fa fa-download"></i> Download</a>
                     </td>
                     <td>
-					{% if file['visible']  == True %}
-                      <a href="imageview/{{ file['fullname'] }}" class="label label-success"><i class="fa fa-picture-o"></i> View</a>
-					{% else %}
+                    {% if file['visible']  == True %}
+                      <a href="imageview?filename={{ file['fullname'] }}" class="label label-success"><i class="fa fa-picture-o"></i> View</a>
+                    {% else %}
 					  <br>
-					{% end %}
+                    {% end %}
+                    </td>
+                    <td>
+                    {% if file['visible']  == True %}
+                      <a href="imageview?filename={{ file['fullname'] }}&rotate=90" class="label label-success"><i class="fa fa-picture-o"></i> View</a>
+                    {% else %}
+					  <br>
+                    {% end %}
                     </td>
                 </tr>
                 {% end %}
