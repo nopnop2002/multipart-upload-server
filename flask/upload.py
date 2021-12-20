@@ -82,6 +82,8 @@ def download():
 def imageview():
 	filename = request.args.get('filename', default=None, type=str)
 	logging.info("{}:filename={}".format(sys._getframe().f_code.co_name, filename))
+	rotate = request.args.get('rotate', default=0, type=int)
+	logging.info("{}:rotate={}{}".format(sys._getframe().f_code.co_name, rotate, type(rotate)))
 
 	mime = magic.from_file(filename, mime=True)
 	mime = mime.split("/")
@@ -93,7 +95,7 @@ def imageview():
 		logging.debug("filename={}".format(filename))
 		filename = os.path.join("/uploaded", filename)
 		logging.debug("filename={}".format(filename))
-		return render_template("view.html", user_image = filename)
+		return render_template("view.html", user_image = filename, rotate=rotate)
 
 	if (mime[0] == "text"):
 		contents = ""

@@ -15,7 +15,7 @@ python -m pip install tornado
 
 ## Start WEB Server using Tornado
 ```
-git clonse https://github.com/nopnop2002/multipart-upload-server
+git clone https://github.com/nopnop2002/multipart-upload-server
 cd multipart-upload-server/tornado
 python upload.py
 ```
@@ -43,7 +43,7 @@ python -m pip install flask
 
 ## Start WEB Server using Flask
 ```
-git clonse https://github.com/nopnop2002/multipart-upload-server
+git clone https://github.com/nopnop2002/multipart-upload-server
 cd multipart-upload-server/flask
 python upload.py
 ```
