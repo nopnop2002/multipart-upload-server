@@ -53,7 +53,7 @@ python upload.py
 curl -X POST -F upfile=@flask/Flask_logo.png http://localhost:8080/upload_multipart
 
 ls -l flask/UPLOADED/
--rw-rw-r-- 1 nop nop 13189  5月 21 08:58 tornado-web-service.jpg
+-rw-rw-r-- 1 nop nop 13189  5月 21 08:58 Flask_logo.png
 ```
 
 ---
