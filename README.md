@@ -11,6 +11,7 @@ sudo apt install python3-pip python3-setuptools python3-magic
 python3 -m pip install -U pip
 python3 -m pip install -U wheel
 python3 -m pip install -U Werkzeug
+python3 -m pip install -U python-magic
 python3 -m pip install -U tornado
 ```
 
@@ -39,6 +40,7 @@ sudo apt install python3-pip python3-setuptools python3-magic
 python3 -m pip install -U pip
 python3 -m pip install -U wheel
 python3 -m pip install -U Werkzeug
+python3 -m pip install -U python-magic
 python3 -m pip install -U flask
 ```
 
